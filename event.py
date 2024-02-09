@@ -4,13 +4,16 @@ from tkinter import *
 
 
 class GameEvent:
-    def __init__(self, window, canvas, snake, food, label, effect):
+    def __init__(self, window, canvas, snake, food, score_label, status_label, effect):
         self.window = window
         self.canvas = canvas
         self.snake = snake
         self.food = food
-        self.label = label
+        self.score_label = score_label
+        self.status_label = status_label
         self.effect = effect
+        self.play_icon = PhotoImage(file="./asset/play.png").subsample(4)
+        self.pause_icon = PhotoImage(file="./asset/pause.png").subsample(4)
 
     def next_turn(self):
         # check for the paused state
@@ -46,7 +49,7 @@ class GameEvent:
             global SCORE
             SCORE += 1
             self.effect.play_eat_effect()
-            self.label.config(text="Score:{}".format(SCORE))
+            self.score_label.config(text="Score:{}".format(SCORE))
             self.canvas.delete("food")
             self.food = Food(self.canvas, self.snake.coordinates)
         else:
@@ -96,6 +99,7 @@ class GameEvent:
         return False
 
     def game_over(self):
+        self.effect.play_collision_effect()
         self.canvas.delete(ALL)
         self.canvas.create_text(
             self.canvas.winfo_width() / 2,
@@ -109,3 +113,8 @@ class GameEvent:
     def toggle_pause(self, event):
         global PAUSED
         PAUSED = not PAUSED
+        
+        if PAUSED:
+            self.status_label.config(image=self.pause_icon)
+        else:
+            self.status_label.config(image=self.play_icon)
