@@ -24,6 +24,6 @@ if __name__ == "__main__":
     window.get_window().bind("<Right>", lambda event: game_event.change_direction("right"))
     window.get_window().bind("<Up>", lambda event: game_event.change_direction("up"))
     window.get_window().bind("<Down>", lambda event: game_event.change_direction("down"))
-    window.get_window().bind("<space>", game_event.toggle_pause)
+    window.get_window().bind("<space>", lambda event: game_event.toggle_pause())
 
     window.get_window().mainloop()

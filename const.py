@@ -1,6 +1,6 @@
 # Constants for window, snake, food attributes
-GAME_WIDTH = 600
-GAME_HEIGHT = 600
+GAME_WIDTH = 640
+GAME_HEIGHT = 640
 SPEED = 200
 SPACE_SIZE = 40
 BODY_PARTS = 3
@@ -14,4 +14,4 @@ PADDING = 1
 SCORE = 0
 DIRECTION = "right"
 GAME_STARTED = False
-PAUSED = False
+PAUSED = True

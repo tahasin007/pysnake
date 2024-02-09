@@ -20,7 +20,7 @@ class GameEvent:
         if PAUSED:
             self.window.after(SPEED, self.next_turn)
             return
-        
+
         x, y = self.snake.coordinates[0]
 
         if DIRECTION == "up":
@@ -34,7 +34,11 @@ class GameEvent:
 
         # Create the head rectangle separately with head color
         head_square = self.canvas.create_rectangle(
-            x, y, x + SPACE_SIZE - PADDING, y + SPACE_SIZE - PADDING, fill=SNAKE_HEAD_COLOR
+            x,
+            y,
+            x + SPACE_SIZE - PADDING,
+            y + SPACE_SIZE - PADDING,
+            fill=SNAKE_HEAD_COLOR,
         )
         self.snake.squares.insert(0, head_square)
 
@@ -68,7 +72,12 @@ class GameEvent:
 
         if not GAME_STARTED:
             GAME_STARTED = True
+            if PAUSED:
+                self.toggle_pause()
             self.next_turn()
+        elif PAUSED:
+            if PAUSED:
+                self.toggle_pause()
 
         if new_direction == "left":
             if DIRECTION != "right":
@@ -91,7 +100,7 @@ class GameEvent:
         elif y < 0 or y >= GAME_HEIGHT:
             return True
 
-        # Check if snake is colliding with its body 
+        # Check if snake is colliding with its body
         for body_part in self.snake.coordinates[1:]:
             if x == body_part[0] and y == body_part[1]:
                 return True
@@ -101,19 +110,34 @@ class GameEvent:
     def game_over(self):
         self.effect.play_collision_effect()
         self.canvas.delete(ALL)
+        self.status_label.destroy()
+        self.score_label.destroy()
+
+        # Display game over message
         self.canvas.create_text(
             self.canvas.winfo_width() / 2,
             self.canvas.winfo_height() / 2,
-            font=("consolas", 70),
+            font=("Helvetica", 50, "bold"),
             text="GAME OVER",
-            fill="red",
+            fill="white",
             tag="gameover",
         )
 
-    def toggle_pause(self, event):
+        # Display score
+        score_text = f"Score: {SCORE}"
+        self.canvas.create_text(
+            self.canvas.winfo_width() / 2,
+            self.canvas.winfo_height() / 2 + 50,
+            font=("Helvetica", 30),
+            text=score_text,
+            fill="white",
+            tag="gameover",
+        )
+
+    def toggle_pause(self):
         global PAUSED
         PAUSED = not PAUSED
-        
+
         if PAUSED:
             self.status_label.config(image=self.pause_icon)
         else:

@@ -16,7 +16,6 @@ class Food:
 
         self.coordinates = [x, y]
 
-        # Load the food image
         original_image = Image.open("./asset/apple.png")
 
         # Resize the image to SPACE_SIZE
