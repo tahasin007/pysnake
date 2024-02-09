@@ -1,70 +1,24 @@
 from tkinter import *
-import random
 from const import *
-
-
-class Snake:
-    def __init__(self):
-        self.body_size = BODY_PARTS
-        self.coordinates = []
-        self.squares = []
-
-        # Head position 
-        head_x = random.randint(2, (GAME_WIDTH / SPACE_SIZE) - 2) * SPACE_SIZE
-        head_y = random.randint(2, (GAME_HEIGHT / SPACE_SIZE) - 2) * SPACE_SIZE
-
-        # Generate initial coordinates for the snake body relative to the head
-        for i in range(BODY_PARTS):
-            self.coordinates.append([head_x - (i * SPACE_SIZE), head_y])
-
-        # Create rectangles for each body segment
-        for i, coordinate in enumerate(self.coordinates):
-            x = coordinate[0]
-            y = coordinate[1]
-            if i == 0:
-                fill_color = SNAKE_HEAD_COLOR
-            else:
-                fill_color = SNAKE_COLOR
-                
-            square = canvas.create_rectangle(
-                x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=fill_color, tag="snake"
-            )
-            self.squares.append(square)
-
-
-class Food:
-    def __init__(self, snake_coordinates):
-        while True:
-            # Generate random coordinates for the food
-            x = random.randint(0, (GAME_WIDTH / SPACE_SIZE) - 1) * SPACE_SIZE
-            y = random.randint(0, (GAME_HEIGHT / SPACE_SIZE) - 1) * SPACE_SIZE
-
-            # Check if the food's coordinates collide with the snake's coordinates
-            if (x, y) not in snake_coordinates:
-                break  # Exit the loop if there's no collision
-
-        self.coordinates = [x, y]
-
-        canvas.create_oval(
-            x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tag="food"
-        )
+from snake import *
+from food import *
 
 
 def next_turn(snake, food):
     # check for the paused state
-    if paused:
+    if PAUSED:
         window.after(SPEED, next_turn, snake, food)
         return
     
     x, y = snake.coordinates[0]
 
-    if direction == "up":
+    if DIRECTION == "up":
         y -= SPACE_SIZE
-    elif direction == "down":
+    elif DIRECTION == "down":
         y += SPACE_SIZE
-    elif direction == "left":
+    elif DIRECTION == "left":
         x -= SPACE_SIZE
-    elif direction == "right":
+    elif DIRECTION == "right":
         x += SPACE_SIZE
 
     # Create the head rectangle separately head color
@@ -81,11 +35,11 @@ def next_turn(snake, food):
         canvas.itemconfig(snake.squares[i], fill=SNAKE_COLOR)
 
     if x == food.coordinates[0] and y == food.coordinates[1]:
-        global score
-        score += 1
-        label.config(text="Score:{}".format(score))
+        global SCORE
+        SCORE += 1
+        label.config(text="Score:{}".format(SCORE))
         canvas.delete("food")
-        food = Food(snake.coordinates)
+        food = Food(canvas, snake.coordinates)
     else:
         # Delete the tail segment and its square
         del snake.coordinates[-1]
@@ -98,24 +52,24 @@ def next_turn(snake, food):
         window.after(SPEED, next_turn, snake, food)
 
 def change_direction(new_direction):
-    global direction, game_started
+    global DIRECTION, GAME_STARTED
 
-    if not game_started:
-        game_started = True
+    if not GAME_STARTED:
+        GAME_STARTED = True
         next_turn(snake, food)
 
     if new_direction == "left":
-        if direction != "right":
-            direction = new_direction
+        if DIRECTION != "right":
+            DIRECTION = new_direction
     elif new_direction == "right":
-        if direction != "left":
-            direction = new_direction
+        if DIRECTION != "left":
+            DIRECTION = new_direction
     elif new_direction == "up":
-        if direction != "down":
-            direction = new_direction
+        if DIRECTION != "down":
+            DIRECTION = new_direction
     elif new_direction == "down":
-        if direction != "up":
-            direction = new_direction
+        if DIRECTION != "up":
+            DIRECTION = new_direction
 
 
 def check_collisions(snake):
@@ -146,20 +100,14 @@ def game_over():
     )
 
 def toggle_pause(event):
-    global paused
-    paused = not paused
-
+    global PAUSED
+    PAUSED = not PAUSED
 
 window = Tk()
 window.title("Snake game")
 window.resizable(False, False)
 
-score = 0
-direction = "down"
-game_started = False
-paused = False
-
-label = Label(window, text="Score:{}".format(score), font=("consolas", 40))
+label = Label(window, text="Score:{}".format(SCORE), font=("consolas", 40))
 label.pack()
 
 canvas = Canvas(window, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
@@ -183,7 +131,7 @@ window.bind("<Up>", lambda event: change_direction("up"))
 window.bind("<Down>", lambda event: change_direction("down"))
 window.bind("<space>", toggle_pause)
 
-snake = Snake()
-food = Food(snake.coordinates)
+snake = Snake(canvas)
+food = Food(canvas, snake.coordinates)
 
 window.mainloop()
