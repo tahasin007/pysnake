@@ -3,6 +3,7 @@ from const import *
 from snake import *
 from food import *
 from event import *
+from effect import *
 
 
 window = Tk()
@@ -29,7 +30,8 @@ window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
 snake = Snake(canvas)
 food = Food(canvas, snake.coordinates)
-game_event = GameEvent(window, canvas, snake, food, label)
+effect = Effect()
+game_event = GameEvent(window, canvas, snake, food, label, effect)
 
 window.bind("<Left>", lambda event: game_event.change_direction("left"))
 window.bind("<Right>", lambda event: game_event.change_direction("right"))

@@ -1,7 +1,7 @@
 # Constants for window, snake, food attributes
 GAME_WIDTH = 600
 GAME_HEIGHT = 600
-SPEED = 100
+SPEED = 125
 SPACE_SIZE = 40
 BODY_PARTS = 3
 SNAKE_COLOR = "#FFFFFF"

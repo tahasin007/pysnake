@@ -4,12 +4,13 @@ from tkinter import *
 
 
 class GameEvent:
-    def __init__(self, window, canvas, snake, food, label):
+    def __init__(self, window, canvas, snake, food, label, effect):
         self.window = window
         self.canvas = canvas
         self.snake = snake
         self.food = food
         self.label = label
+        self.effect = effect
 
     def next_turn(self):
         # check for the paused state
@@ -44,6 +45,7 @@ class GameEvent:
         if x == self.food.coordinates[0] and y == self.food.coordinates[1]:
             global SCORE
             SCORE += 1
+            self.effect.play_eat_effect()
             self.label.config(text="Score:{}".format(SCORE))
             self.canvas.delete("food")
             self.food = Food(self.canvas, self.snake.coordinates)

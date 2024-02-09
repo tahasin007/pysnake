@@ -1,3 +1,4 @@
+from PIL import Image, ImageTk
 import random
 from const import *
 
@@ -15,6 +16,16 @@ class Food:
 
         self.coordinates = [x, y]
 
-        canvas.create_oval(
-            x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tag="food"
+        # Load the food image
+        original_image = Image.open("./asset/apple.png")
+
+        # Resize the image to SPACE_SIZE
+        resized_image = original_image.resize((SPACE_SIZE, SPACE_SIZE))
+
+        # Convert the resized image to a format compatible with Tkinter
+        self.food_image = ImageTk.PhotoImage(resized_image)
+
+        # Create food item at the specified coordinates
+        self.food_item = canvas.create_image(
+            x + SPACE_SIZE / 2, y + SPACE_SIZE / 2, image=self.food_image, tag="food"
         )
