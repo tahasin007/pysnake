@@ -9,20 +9,39 @@ class Snake:
         self.coordinates = []
         self.squares = []
 
-        for i in range(0, BODY_PARTS):
-            self.coordinates.append([0, 0])
+        # head position 
+        head_x = random.randint(2, (GAME_WIDTH / SPACE_SIZE) - 2) * SPACE_SIZE
+        head_y = random.randint(2, (GAME_HEIGHT / SPACE_SIZE) - 2) * SPACE_SIZE
 
-        for x, y in self.coordinates:
+        # generate initial coordinates for the snake body relative to the head
+        for i in range(BODY_PARTS):
+            self.coordinates.append([head_x - (i * SPACE_SIZE), head_y])
+
+        # Create rectangles for each body segment
+        for i, coordinate in enumerate(self.coordinates):
+            x = coordinate[0]
+            y = coordinate[1]
+            if i == 0:
+                fill_color = SNAKE_HEAD_COLOR
+            else:
+                fill_color = SNAKE_COLOR
+                
             square = canvas.create_rectangle(
-                x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake"
+                x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=fill_color, tag="snake"
             )
             self.squares.append(square)
 
 
 class Food:
-    def __init__(self):
-        x = random.randint(0, (GAME_WIDTH / SPACE_SIZE) - 1) * SPACE_SIZE
-        y = random.randint(0, (GAME_HEIGHT / SPACE_SIZE) - 1) * SPACE_SIZE
+    def __init__(self, snake_coordinates):
+        while True:
+            # Generate random coordinates for the food
+            x = random.randint(0, (GAME_WIDTH / SPACE_SIZE) - 1) * SPACE_SIZE
+            y = random.randint(0, (GAME_HEIGHT / SPACE_SIZE) - 1) * SPACE_SIZE
+
+            # Check if the food's coordinates collide with the snake's coordinates
+            if (x, y) not in snake_coordinates:
+                break  # Exit the loop if there's no collision
 
         self.coordinates = [x, y]
 
@@ -32,6 +51,11 @@ class Food:
 
 
 def next_turn(snake, food):
+    # check for the paused state
+    if paused:
+        window.after(SPEED, next_turn, snake, food)
+        return
+    
     x, y = snake.coordinates[0]
 
     if direction == "up":
@@ -56,7 +80,7 @@ def next_turn(snake, food):
         score += 1
         label.config(text="Score:{}".format(score))
         canvas.delete("food")
-        food = Food()
+        food = Food(snake.coordinates)
     else:
         del snake.coordinates[-1]
         canvas.delete(snake.squares[-1])
@@ -70,7 +94,6 @@ def next_turn(snake, food):
 
 
 def change_direction(new_direction):
-
     global direction, game_started
 
     if not game_started:
@@ -92,7 +115,6 @@ def change_direction(new_direction):
 
 
 def check_collisions(snake):
-
     x, y = snake.coordinates[0]
 
     if x < 0 or x >= GAME_WIDTH:
@@ -100,6 +122,7 @@ def check_collisions(snake):
     elif y < 0 or y >= GAME_HEIGHT:
         return True
 
+    # check if snake is colliding with its body 
     for body_part in snake.coordinates[1:]:
         if x == body_part[0] and y == body_part[1]:
             return True
@@ -108,7 +131,6 @@ def check_collisions(snake):
 
 
 def game_over():
-
     canvas.delete(ALL)
     canvas.create_text(
         canvas.winfo_width() / 2,
@@ -119,6 +141,10 @@ def game_over():
         tag="gameover",
     )
 
+def toggle_pause(event):
+    global paused
+    paused = not paused
+
 
 window = Tk()
 window.title("Snake game")
@@ -127,6 +153,7 @@ window.resizable(False, False)
 score = 0
 direction = "down"
 game_started = False
+paused = False
 
 label = Label(window, text="Score:{}".format(score), font=("consolas", 40))
 label.pack()
@@ -150,8 +177,9 @@ window.bind("<Left>", lambda event: change_direction("left"))
 window.bind("<Right>", lambda event: change_direction("right"))
 window.bind("<Up>", lambda event: change_direction("up"))
 window.bind("<Down>", lambda event: change_direction("down"))
+window.bind("<space>", toggle_pause)
 
 snake = Snake()
-food = Food()
+food = Food(snake.coordinates)
 
 window.mainloop()
