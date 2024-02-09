@@ -9,11 +9,11 @@ class Snake:
         self.coordinates = []
         self.squares = []
 
-        # head position 
+        # Head position 
         head_x = random.randint(2, (GAME_WIDTH / SPACE_SIZE) - 2) * SPACE_SIZE
         head_y = random.randint(2, (GAME_HEIGHT / SPACE_SIZE) - 2) * SPACE_SIZE
 
-        # generate initial coordinates for the snake body relative to the head
+        # Generate initial coordinates for the snake body relative to the head
         for i in range(BODY_PARTS):
             self.coordinates.append([head_x - (i * SPACE_SIZE), head_y])
 
@@ -67,13 +67,18 @@ def next_turn(snake, food):
     elif direction == "right":
         x += SPACE_SIZE
 
+    # Create the head rectangle separately head color
+    head_square = canvas.create_rectangle(
+        x, y, x + SPACE_SIZE - PADDING, y + SPACE_SIZE - PADDING, fill=SNAKE_HEAD_COLOR
+    )
+    snake.squares.insert(0, head_square)
+
+    # Insert new head coordinates at the beginning of the coordinates list
     snake.coordinates.insert(0, (x, y))
 
-    square = canvas.create_rectangle(
-        x, y, x + SPACE_SIZE - PADDING, y + SPACE_SIZE - PADDING, fill=SNAKE_COLOR
-    )
-
-    snake.squares.insert(0, square)
+    # Change the color of existing rectangles for the rest of the snake
+    for i in range(1, len(snake.coordinates)):
+        canvas.itemconfig(snake.squares[i], fill=SNAKE_COLOR)
 
     if x == food.coordinates[0] and y == food.coordinates[1]:
         global score
@@ -82,16 +87,15 @@ def next_turn(snake, food):
         canvas.delete("food")
         food = Food(snake.coordinates)
     else:
+        # Delete the tail segment and its square
         del snake.coordinates[-1]
         canvas.delete(snake.squares[-1])
         del snake.squares[-1]
 
     if check_collisions(snake):
         game_over()
-
     else:
         window.after(SPEED, next_turn, snake, food)
-
 
 def change_direction(new_direction):
     global direction, game_started
@@ -122,7 +126,7 @@ def check_collisions(snake):
     elif y < 0 or y >= GAME_HEIGHT:
         return True
 
-    # check if snake is colliding with its body 
+    # Check if snake is colliding with its body 
     for body_part in snake.coordinates[1:]:
         if x == body_part[0] and y == body_part[1]:
             return True
